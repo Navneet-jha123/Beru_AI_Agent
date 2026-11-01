@@ -24,6 +24,29 @@ endpoint on the same machine and fail closed if it is unavailable. Configure
 `LOCAL_LLM_URL` for an installed local model server. The API mode additionally
 requires reviewed hostnames in `BERU_API_ALLOWED_HOSTS`.
 
+## Deploying for other people (bring your own keys)
+
+When BERU is hosted for other users, each visitor pastes their own keys in the
+app (Groq, Gemini, OpenRouter, Alpha Vantage, VirusTotal, Telegram) and only
+those are used for their requests.
+
+- Keys live in that browser session's server-side memory only. They are never
+  written to disk or logs, and they are forgotten when the session ends or the
+  visitor removes them.
+- While a visitor's request runs, the server's own copies of these keys are
+  hidden, so a leftover `.env` can never be used on someone's behalf.
+- **Do not deploy a `.env` file or set these variables on the host.** Requests
+  from different visitors run one at a time inside a process so keys can never
+  mix; for many simultaneous users, run several instances behind a load
+  balancer.
+- Telegram alerts use a single bot per server process; per-visitor keys apply
+  only to actions started from that visitor's session.
+- Before deploying run `python api_keys.py --check` and `python -m pytest
+  test_api_keys.py -q`. The check lists every place a key is read and flags any
+  client created at import time (it would keep the server's key and must move
+  inside a function).
+- Running `python main.py` (CLI) still reads `.env` as before.
+
 ## Modes and business use
 
 | Mode | Example work |

@@ -56,6 +56,9 @@ from tools_registry import get_live_schemas, get_live_tools
 from brain import get_tool_optimizer_report
 from modes import market_analyst as market_core
 
+import api_keys  # per-visitor API keys (bring your own keys)
+import key_ui
+
 st.set_page_config(
     page_title="BERU · Your everyday AI workspace",
     page_icon="✦",
@@ -756,6 +759,8 @@ def sidebar() -> str:
         st.session_state.mode = chosen_mode
         st.caption(MODE_HINTS[chosen_mode])
 
+        key_ui.render_sidebar_keys()  # <--- ADD THIS LINE
+
         with st.expander("Computer & app details", expanded=False):
             telemetry = get_hardware_telemetry()
             st.caption("A snapshot of the computer running BERU. Refreshes when the app reruns.")
@@ -1364,8 +1369,32 @@ PAGE_RENDERERS = {
     "Activity history": render_history,
 }
 
+PAGE_RENDERERS = {
+    "Assistant": render_assistant,
+    "Stock explorer": render_market,
+    "Create tools": render_tools,
+    "Developer workspace": render_developer,
+    "Website checks": render_web_checks,
+    "Activity history": render_history,
+}
+
+def run_page(name: str) -> None:
+    """Render one page with ONLY this visitor's own API keys active."""
+    try:
+        with api_keys.applied(key_ui.user_keys()):
+            PAGE_RENDERERS[name]()
+    except api_keys.KeyScopeBusy:
+        st.warning("BERU is finishing another request. Please wait a moment and try again.")
+        st.button("Check again", key="beru_busy_retry")
+
 init_state()
 st.markdown(build_css(st.session_state.beru_theme_mode), unsafe_allow_html=True)
 page = sidebar()
 topbar(page)
-PAGE_RENDERERS[page]()
+
+# THE BYOK GATE
+if key_ui.needs_setup():
+    key_ui.render_key_manager()
+else:
+    key_ui.show_flash()
+    run_page(page)
