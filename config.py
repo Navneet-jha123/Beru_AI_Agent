@@ -28,8 +28,8 @@ LOCAL_LLM_URL: str = os.getenv("LOCAL_LLM_URL", "http://127.0.0.1:11434/v1").str
 
 # 3. Model Architecture (VALID model IDs only)
 # Groq tool-calling models (from Groq's current model list). Override in .env if needed.
-PRIMARY_MODEL: str = os.getenv("BERU_MODEL", "llama-3.3-70b-versatile")
-GROQ_BACKUP_MODEL: str = os.getenv("BERU_GROQ_BACKUP_MODEL", "llama-3.1-8b-instant")
+PRIMARY_MODEL: str = os.getenv("BERU_MODEL", "openai/gpt-oss-120b")
+GROQ_BACKUP_MODEL: str = os.getenv("BERU_GROQ_BACKUP_MODEL", "openai/gpt-oss-20b")
 GEMINI_MODEL: str = os.getenv("BERU_GEMINI_MODEL", "gemini-2.5-flash")
 OPENROUTER_MODEL: str = os.getenv("BERU_OPENROUTER_MODEL", "openai/gpt-4o-mini")
 # Local server model name (Ollama e.g. "llama3.2"). Empty = auto-detect the first installed model.
